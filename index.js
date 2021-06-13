@@ -27,12 +27,5 @@ io.on('connection', socket => {
       });
       io.emit("messages", messages);
   })
-
-  socket.on("disconnect", async() => {
-    socket.on("user", async(user) => {
-        await usernames.push(user.username);
-        io.emit("users", usernames);
-     })
-  })
 });
 
