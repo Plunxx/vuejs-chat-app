@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vuejs - Chat App</title>
+</head>
+<body>
+        <div id="app">
+      <div v-if="!login">
+        <h1 class="title">Realtime chat system with Vuejs</h1><br>
+        <div class="signin-box">
+          <form @submit.prevent="loginFunction()">
+            <input placeholder=" Your nickname.." v-model="username" type="text" />
+              </form>
+            <button @click="loginFunction()">Login</button>
+        </div>
+      </div>
+      <div v-else>
+        <div class="box">
+            <div class="chat-box">
+                <ul>
+                    <li style="margin:2.6%" v-for="message in messages" :key="message">
+                   {{ message.author }} : {{ message.message }}
+                    </li>
+                  </ul>
+            </div>
+            <form @submit.prevent="enter()"> 
+                <input class="message-box" v-model="message" type="text" placeholder=" Write something in chat..">
+                </form>
+            <button class="enter" @click="enter()">Send</button>
+    
+            <div class="online-users">
+              <h1>Online Users</h1>
+              <ul style="list-style-type: none;">
+                <li style="margin:2.6%" v-for="user in users" :key="user">
+             <span style="font-size: 17px">Account name:</span>  <b>{{ user }}</b>
+                </li>
+              </ul>
+            </div>
+          </div>
+            </div>
+    </div>
+</body>
+   <script src="/socket.io/socket.io.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+   <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+
+   <script>
+    let socket = io();
+    dayjs.locale('en')
+  new Vue({
+    el: "#app",
+    data () {
+      return {
+        login: false,
+        username: '',
+        message: '',
+        users: [],
+        messages: []
+      }
+    },
+    methods: {
+      loginFunction: function() {
+        if(!this.username) {
+          alert("Bir isim girmelisin.");
+        } else {
+          socket.emit("user", {username: this.username});
+          this.login = true;
+        };
+      },
+      enter: function() {
+         if(!this.message) return alert("Bir şeyler yazınız.");
+          socket.emit("message", {author: this.username, message: this.message});
+          this.message = ''
+      }
+    },
+    created() {
+        socket.on("users", async(info) => {
+            this.users = info
+          })
+
+          socket.on("messages", async(messages) => {
+            this.messages = messages
+          })
+    }
+  })    
+  </script>
+  
+  <style scoped>
+  body {
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+.box {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100rem;
+    height: 40rem;
+}
+
+  .signin-box {
+    width: 20rem;
+    height: 10rem;
+  }
+  
+  .signin-box > form > input {
+    width: 15rem;
+    height: 2rem;
+    color: black;
+    border: 2px solid #00ffb2;
+  }
+  
+  .signin-box > button {
+    margin-top: 2%;
+    width: 15.7rem;
+    height: 2rem;
+    background-color: #047a5f;
+    border: none;
+    color: white;
+  }
+  
+  .title {
+    font-family: Arial;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .chat-box {
+    overflow: auto;
+    width: 35rem;
+    height: 27.5rem;
+    background-color: #ffffff;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+    border-radius: 1%;
+  }
+  
+  .message-box {
+    padding: 10px;
+    position: relative;
+    top: 15%;
+    left: 32.5%;
+    width: 29rem;
+    height: 2rem;
+  } 
+
+  .enter {
+    position: relative;
+    top: -8.5%;
+    left: 63.4%;
+    border: 1px solid rgb(4, 0, 255);
+    color:rgb(  0, 0, 0);
+    width: 4.6rem;
+    height: 3.5rem;
+  }
+
+  .enter:hover {
+      border: 0;
+      background-color: rgb(4, 0, 255);
+      color:white
+  }
+
+  .online-users {
+    overflow: auto;
+    width: 20rem;
+    height: 27.5rem;
+    border: 1px solid black;
+    margin-left: 70%;
+    margin-top: -34.5%;
+  }
+  
+  .online-users > h1 {
+    text-align: center;
+    border-bottom: 1px solid black;
+    font-family: Arial
+  }
+
+  </style>
+  </html>
